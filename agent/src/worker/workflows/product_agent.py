@@ -278,7 +278,7 @@ async def gh_create_pr(
 
 
 def _request(system: str, user: str) -> Any:
-    from mistralai.models import ChatCompletionRequest
+    from mistralai.workflows.plugins.mistralai import ChatCompletionRequest
 
     return ChatCompletionRequest(
         model=LLM_MODEL,
