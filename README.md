@@ -42,7 +42,7 @@ Zero dependencies — Python 3 stdlib only. Data lives in `data/db.json`.
 | Phase | Piece | Status |
 |---|---|---|
 | 1 | Server (stdlib HTTP, JSON store, now-playing engine, PIN auth) | done |
-| 1 | Kids view `/` — power button, 3 channel buttons, synced playback, break + off-air screens | done |
+| 1 | Kids view `/` — retro CRT TV (VHF/UHF channel knobs, power switch, OSD blip), synced playback, break + off-air screens | done |
 | 1 | Parent view `/parent` — schedule, library, breaks, channels, PIN | done |
 | 1 | Real video files via `media/` with HTTP Range support | done |
 | 2 | TV-Guide-style grid (what's on tonight/week) in parent view | todo |

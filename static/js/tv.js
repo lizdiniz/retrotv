@@ -10,8 +10,10 @@
   const offairNext = document.getElementById("offair-next");
   const powerOff = document.getElementById("power-off");
   const powerBtn = document.getElementById("power");
-  const channelsEl = document.getElementById("channels");
   const clockEl = document.getElementById("clock");
+  const chIndicator = document.getElementById("ch-indicator");
+  const osd = document.getElementById("osd");
+  const nowLine = document.getElementById("now-line");
 
   const state = {
     on: false,
@@ -21,8 +23,8 @@
     curSrc: null,
     pendingSeek: 0,
     breakRemaining: 0,
-    raf: null,
     staticOn: false,
+    osdTimer: null,
   };
 
   const fmtTime = (iso) => {
@@ -37,44 +39,62 @@
     return /^https?:\/\//.test(src) ? src : "/media/" + encodeURIComponent(src);
   }
 
+  function channelList() {
+    return state.data ? state.data.channels : [];
+  }
+
+  function currentChannel() {
+    const list = channelList();
+    if (!list.length) return null;
+    return list.find((c) => c.channelId === state.ch) || list[0];
+  }
+
   async function poll() {
     try {
       const r = await fetch("/api/now", { cache: "no-store" });
       state.data = await r.json();
-      renderChannels();
+      renderStatus();
       syncScreen();
     } catch (e) { /* keep last state */ }
   }
 
-  function renderChannels() {
+  function showOsd() {
+    const c = currentChannel();
+    if (!c) return;
+    osd.textContent = "CH " + c.number;
+    osd.classList.remove("hidden");
+    clearTimeout(state.osdTimer);
+    state.osdTimer = setTimeout(() => osd.classList.add("hidden"), 1600);
+  }
+
+  function selectChannel(id) {
+    state.ch = id;
+    state.curEntryId = null;
+    renderStatus();
+    showOsd();
+    syncScreen();
+  }
+
+  function cycle(dir) {
+    const list = channelList();
+    if (!list.length) return;
+    const i = list.findIndex((c) => c.channelId === state.ch);
+    selectChannel(list[(i + dir + list.length) % list.length].channelId);
+  }
+
+  document.getElementById("knob-vhf").addEventListener("click", () => cycle(-1));
+  document.getElementById("knob-uhf").addEventListener("click", () => cycle(1));
+
+  function renderStatus() {
     if (!state.data) return;
     if (!state.ch) state.ch = state.data.channels[0].channelId;
-    channelsEl.innerHTML = "";
-    for (const c of state.data.channels) {
-      const b = document.createElement("button");
-      b.className = "ch-btn" + (c.channelId === state.ch ? " active" : "");
-      let nowTxt, nowCls = "";
-      if (c.state === "program") nowTxt = "▶ " + c.entry.title;
-      else if (c.state === "break") { nowTxt = "◼ " + c.brk.label; nowCls = "break"; }
-      else nowTxt = c.next ? "off air · next " + fmtTime(c.next.start) : "off air";
-      b.innerHTML =
-        '<div class="ch-num">CH ' + c.number + '</div>' +
-        '<div class="ch-name">' + escapeHtml(c.name) + '</div>' +
-        '<div class="ch-now ' + nowCls + '">' + escapeHtml(nowTxt) + "</div>";
-      b.onclick = () => { state.ch = c.channelId; state.curEntryId = null; renderChannels(); syncScreen(); };
-      channelsEl.appendChild(b);
-    }
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (m) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-    }[m]));
-  }
-
-  function currentChannel() {
-    if (!state.data) return null;
-    return state.data.channels.find((c) => c.channelId === state.ch) || state.data.channels[0];
+    const c = currentChannel();
+    chIndicator.textContent = "CH " + c.number;
+    let txt;
+    if (c.state === "program") txt = "▶ " + c.entry.title;
+    else if (c.state === "break") txt = "◼ " + c.brk.label;
+    else txt = c.next ? "off air · next " + fmtTime(c.next.start) : "off air";
+    nowLine.textContent = "CH " + c.number + " · " + c.name + " — " + txt;
   }
 
   function syncScreen() {
@@ -188,7 +208,6 @@
       img.data[i] = v; img.data[i + 1] = v; img.data[i + 2] = v; img.data[i + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
-    ctx.imageSmoothingEnabled = true;
   }
 
   function loop() {
@@ -197,12 +216,11 @@
         drawStatic();
         loop.lastStatic = Date.now();
       }
-      canvas.width = canvas.width; // keep size
     }
-    state.raf = requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
   }
 
-  powerBtn.onclick = () => {
+  powerBtn.addEventListener("click", () => {
     state.on = !state.on;
     powerBtn.classList.toggle("on", state.on);
     powerOff.classList.toggle("off", state.on);
@@ -211,11 +229,12 @@
       breakOverlay.classList.add("hidden");
       offairEl.classList.add("hidden");
       state.staticOn = false;
+      nowLine.textContent = "";
       document.title = "RetroTV";
     } else {
       syncScreen();
     }
-  };
+  });
 
   setInterval(() => {
     clockEl.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
