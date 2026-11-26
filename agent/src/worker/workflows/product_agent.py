@@ -29,7 +29,7 @@ from mistralai.workflows.plugins.mistralai.connectors import (
 github = connector("github_app")
 
 DEFAULT_REPO = "lizdiniz/retrotv"
-LLM_MODEL = "mistral-large-latest"
+LLM_MODEL = "mistral-small-latest"
 
 
 class ProductAgentInput(pydantic.BaseModel):
