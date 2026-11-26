@@ -142,6 +142,7 @@ def public_entry(db, entry):
     dur_s = lib["durationMinutes"] * 60
     return {
         "id": entry["id"],
+        "channelId": entry["channelId"],
         "libraryId": entry["libraryId"],
         "title": lib["title"],
         "kind": lib["kind"],
@@ -212,6 +213,7 @@ def api_login(body, db):
 def api_data(body, db):
     check_pin(db, body)
     data = {k: v for k, v in db.items() if k != "pin"}
+    data["schedule"] = [public_entry(db, e) for e in db["schedule"]]
     data["mediaFiles"] = list_media()
     return data
 
