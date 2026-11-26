@@ -6,6 +6,20 @@
   const loginEl = $("login"), appEl = $("app");
   const toastEl = $("toast");
 
+  const errBanner = document.createElement("div");
+  errBanner.style.cssText = "position:fixed;top:0;left:0;right:0;background:#a33;color:#fff;padding:8px 12px;font:13px monospace;z-index:99;display:none;white-space:pre-wrap";
+  document.body.appendChild(errBanner);
+  window.addEventListener("error", (e) => {
+    errBanner.style.display = "block";
+    errBanner.textContent += "JS error: " + e.message + " @ " + (e.filename || "") + ":" + e.lineno + "\n";
+    console.error(e);
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    errBanner.style.display = "block";
+    errBanner.textContent += "Async error: " + ((e.reason && e.reason.message) || e.reason) + "\n";
+    console.error(e.reason);
+  });
+
   function toast(msg) {
     toastEl.textContent = msg;
     toastEl.classList.remove("hidden");
@@ -231,6 +245,7 @@
       appEl.classList.remove("hidden");
       await refresh();
     } catch (err) {
+      console.error("login/refresh failed:", err);
       $("login-error").classList.remove("hidden");
     }
   }
