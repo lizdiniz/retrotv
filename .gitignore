@@ -1,0 +1,15 @@
+# app runtime state
+data/
+media/*.mp4
+media/*.webm
+media/*.mkv
+media/*.mov
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+# agent local state
+agent/.env
+agent/.mistral/
+agent/node_modules/

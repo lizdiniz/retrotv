@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RetroTV · Parent</title>
+<link rel="stylesheet" href="/static/css/parent.css">
+</head>
+<body>
+
+<div id="login">
+  <div class="login-card">
+    <h1>RETRO<span>TV</span></h1>
+    <p>parent console</p>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="8" placeholder="PIN" autocomplete="off">
+    <button id="login-btn">Sign in</button>
+    <div id="login-error" class="hidden">wrong PIN</div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <div class="brand">RETRO<span>TV</span> <em>parent console</em></div>
+    <nav id="tabs">
+      <button data-tab="schedule" class="active">Schedule</button>
+      <button data-tab="library">Library</button>
+      <button data-tab="channels">Channels</button>
+      <button data-tab="settings">Settings</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="tab-schedule" class="tab active">
+      <p class="hint">Program each channel ahead of time. Blocks play in time order; gaps show OFF AIR. Breaks fire mid-block, like 90s commercials.</p>
+      <div id="schedule-root"></div>
+    </section>
+
+    <section id="tab-library" class="tab">
+      <p class="hint">Your shows and movies. Drop video files into the server's <code>media/</code> folder, or leave the file empty for a test-pattern stand-in.</p>
+      <form id="library-form" class="card form-row">
+        <input id="lib-title" placeholder="Title" required maxlength="120">
+        <select id="lib-kind">
+          <option value="show">Show</option>
+          <option value="movie">Movie</option>
+        </select>
+        <input id="lib-dur" type="number" min="1" max="1440" placeholder="Minutes" required>
+        <select id="lib-src"><option value="">(test pattern)</option></select>
+        <button type="submit">Add</button>
+      </form>
+      <div id="library-root"></div>
+    </section>
+
+    <section id="tab-channels" class="tab">
+      <p class="hint">Rename the three channels. Kids only see these buttons.</p>
+      <div id="channels-root"></div>
+    </section>
+
+    <section id="tab-settings" class="tab">
+      <div class="card">
+        <h2>Change PIN</h2>
+        <form id="pin-form" class="form-row">
+          <input id="pin-new" type="password" inputmode="numeric" maxlength="8" placeholder="New PIN (4-8 digits)" required>
+          <button type="submit">Update PIN</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Tips</h2>
+        <ul class="tips">
+          <li>Kids view: <code>/</code> — only channel buttons, no browsing.</li>
+          <li>Open the kids view on a phone/tablet on the same Wi-Fi to "tune in".</li>
+          <li>Breaks pause the show for their full duration, then it resumes.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+  <div id="toast" class="hidden"></div>
+</div>
+
+<script src="/static/js/parent.js"></script>
+</body>
+</html>

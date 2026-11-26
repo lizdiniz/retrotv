@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RetroTV</title>
+<link rel="stylesheet" href="/static/css/tv.css">
+</head>
+<body>
+<div id="tv">
+  <div id="screen-wrap">
+    <div id="screen">
+      <video id="video" playsinline></video>
+      <canvas id="canvas"></canvas>
+      <div id="break-overlay" class="hidden">
+        <div class="break-kicker">COMMERCIAL BREAK</div>
+        <div class="break-label" id="break-label">Bathroom Break</div>
+        <div class="break-count" id="break-count"></div>
+        <div class="break-bar"><div id="break-fill"></div></div>
+      </div>
+      <div id="offair" class="hidden">
+        <div class="offair-text">OFF&nbsp;AIR</div>
+        <div id="offair-next" class="offair-next"></div>
+      </div>
+      <div id="power-off">
+        <div class="power-logo">RETRO<span>TV</span></div>
+        <div class="power-hint">press &#9211; to turn on</div>
+      </div>
+    </div>
+  </div>
+  <div id="controls">
+    <button id="power" title="power">&#9211;</button>
+    <div id="channels"></div>
+  </div>
+  <div id="clock"></div>
+</div>
+<script src="/static/js/tv.js"></script>
+</body>
+</html>
