@@ -14,6 +14,9 @@
   const chIndicator = document.getElementById("ch-indicator");
   const osd = document.getElementById("osd");
   const nowLine = document.getElementById("now-line");
+  const knobVhf = document.getElementById("knob-vhf");
+  const knobUhf = document.getElementById("knob-uhf");
+  const led = document.getElementById("led");
 
   const state = {
     on: false,
@@ -79,11 +82,14 @@
     const list = channelList();
     if (!list.length) return;
     const i = list.findIndex((c) => c.channelId === state.ch);
-    selectChannel(list[(i + dir + list.length) % list.length].channelId);
+    const n = (i + dir + list.length) % list.length;
+    knobVhf.style.transform = `rotate(${-n * 40}deg)`;
+    knobUhf.style.transform = `rotate(${n * 40}deg)`;
+    selectChannel(list[n].channelId);
   }
 
-  document.getElementById("knob-vhf").addEventListener("click", () => cycle(-1));
-  document.getElementById("knob-uhf").addEventListener("click", () => cycle(1));
+  knobVhf.addEventListener("click", () => cycle(-1));
+  knobUhf.addEventListener("click", () => cycle(1));
 
   function renderStatus() {
     if (!state.data) return;
@@ -223,6 +229,7 @@
   powerBtn.addEventListener("click", () => {
     state.on = !state.on;
     powerBtn.classList.toggle("on", state.on);
+    led.classList.toggle("on", state.on);
     powerOff.classList.toggle("off", state.on);
     if (!state.on) {
       video.pause();

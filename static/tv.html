@@ -10,45 +10,50 @@
 <div id="tv">
   <div class="tv-cabinet">
     <div class="screen-bezel">
-      <div id="screen">
-        <video id="video" playsinline></video>
-        <canvas id="canvas"></canvas>
-        <div class="scanlines"></div>
-        <div class="crt-vignette"></div>
-        <div id="osd" class="hidden">CH 3</div>
-        <div id="break-overlay" class="hidden">
-          <div class="break-kicker">COMMERCIAL BREAK</div>
-          <div class="break-label" id="break-label">Bathroom Break</div>
-          <div class="break-count" id="break-count"></div>
-          <div class="break-bar"><div id="break-fill"></div></div>
-        </div>
-        <div id="offair" class="hidden">
-          <div class="offair-text">OFF&nbsp;AIR</div>
-          <div id="offair-next" class="offair-next"></div>
-        </div>
-        <div id="power-off">
-          <div class="power-logo">RETROTRON<span>2000</span></div>
-          <div class="power-hint">flip the power switch</div>
+      <div class="glass-trim">
+        <div id="screen">
+          <video id="video" playsinline></video>
+          <canvas id="canvas"></canvas>
+          <div class="scanlines"></div>
+          <div class="crt-vignette"></div>
+          <div id="osd" class="hidden">CH 3</div>
+          <div id="break-overlay" class="hidden">
+            <div class="break-kicker">COMMERCIAL BREAK</div>
+            <div class="break-label" id="break-label">Bathroom Break</div>
+            <div class="break-count" id="break-count"></div>
+            <div class="break-bar"><div id="break-fill"></div></div>
+          </div>
+          <div id="offair" class="hidden">
+            <div class="offair-text">OFF&nbsp;AIR</div>
+            <div id="offair-next" class="offair-next"></div>
+          </div>
+          <div id="power-off">
+            <div class="power-logo">RETROTRON</div>
+            <div class="power-hint">press power</div>
+          </div>
         </div>
       </div>
     </div>
     <div class="side-panel">
-      <div class="brand">RETROTRON<span>2000</span></div>
+      <div class="brand-plate">RETROTRON<span>2000</span></div>
       <div class="ch-window"><span id="ch-indicator">--</span></div>
       <div class="speaker"></div>
       <div class="controls-col">
         <div class="knob-row">
           <div class="knob-wrap">
-            <button class="knob" id="knob-vhf" title="channel down" aria-label="channel down"><span class="knob-line"></span></button>
+            <div class="knob-dial"><button class="knob" id="knob-vhf" title="channel down" aria-label="channel down"><span class="knob-line"></span></button></div>
             <div class="knob-label">VHF</div>
           </div>
           <div class="knob-wrap">
-            <button class="knob" id="knob-uhf" title="channel up" aria-label="channel up"><span class="knob-line"></span></button>
+            <div class="knob-dial"><button class="knob" id="knob-uhf" title="channel up" aria-label="channel up"><span class="knob-line"></span></button></div>
             <div class="knob-label">UHF</div>
           </div>
         </div>
         <div class="knob-wrap">
-          <button id="power" class="power-switch" title="power" aria-label="power"><span class="switch-tab"></span></button>
+          <div class="power-row">
+            <button id="power" class="power-btn" title="power" aria-label="power">&#9211;</button>
+            <span id="led" class="led"></span>
+          </div>
           <div class="knob-label">POWER</div>
         </div>
       </div>

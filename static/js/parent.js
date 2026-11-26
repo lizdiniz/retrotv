@@ -184,7 +184,7 @@
       tr.append(el("td", {}, del));
       table.append(tr);
     }
-    card.append(table);
+    card.append(el("div", { class: "inset-table" }, table));
     root.append(card);
   }
 

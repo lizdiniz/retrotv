@@ -2,7 +2,7 @@
 
 html, body {
   height: 100%;
-  background: #0b0c10;
+  background: #101014;
   color: #e8e4d8;
   font-family: "Trebuchet MS", Verdana, sans-serif;
   overflow: hidden;
@@ -19,40 +19,53 @@ html, body {
   padding: 16px;
 }
 
-/* ---- the cabinet ---- */
+/* ---- cabinet: chunky matte black plastic, corner screws ---- */
 .tv-cabinet {
   display: flex;
-  gap: 16px;
-  width: min(96vw, 980px);
-  padding: 20px;
-  border-radius: 28px;
-  background: linear-gradient(155deg, #26272e 0%, #17181d 45%, #0e0f13 100%);
-  border: 2px solid #33353d;
+  gap: 18px;
+  width: min(96vw, 1000px);
+  padding: 24px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle 5px at 16px 16px, #000 35%, #565a64 45%, rgba(0,0,0,0) 65%),
+    radial-gradient(circle 5px at calc(100% - 16px) 16px, #000 35%, #565a64 45%, rgba(0,0,0,0) 65%),
+    radial-gradient(circle 5px at 16px calc(100% - 16px), #000 35%, #565a64 45%, rgba(0,0,0,0) 65%),
+    radial-gradient(circle 5px at calc(100% - 16px) calc(100% - 16px), #000 35%, #565a64 45%, rgba(0,0,0,0) 65%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 2px, rgba(0, 0, 0, 0) 2px 5px),
+    linear-gradient(160deg, #232429 0%, #17181c 55%, #101115 100%);
+  border: 1px solid #000;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.5),
-    0 26px 70px rgba(0, 0, 0, 0.65);
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.55),
+    0 30px 80px rgba(0, 0, 0, 0.7);
 }
 
-/* ---- screen + bezel ---- */
+/* ---- thick uniform bezel + silver glass trim ---- */
 .screen-bezel {
   flex: 1;
-  background: #050608;
-  border-radius: 22px;
-  padding: 16px;
+  background: #0a0a0c;
+  border-radius: 14px;
+  padding: 24px;
   box-shadow:
-    inset 0 2px 10px rgba(0, 0, 0, 0.9),
-    0 1px 0 rgba(255, 255, 255, 0.05);
+    inset 0 3px 14px rgba(0, 0, 0, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-trim {
+  border: 2px solid #3c3f47;
+  border-radius: 12px;
+  padding: 3px;
+  background: #000;
 }
 
 #screen {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 18px;
+  border-radius: 8px;
   overflow: hidden;
   background: #000;
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 0 46px rgba(0, 0, 0, 0.9);
 }
 
 #video, #canvas {
@@ -64,38 +77,37 @@ html, body {
   background: #000;
 }
 
-/* subtle CRT dressing — kept faint on purpose (low-stimulation kids view) */
+/* faint CRT dressing — kept low for the kids view */
 .scanlines {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.10) 0 1px, transparent 1px 3px);
-  opacity: 0.5;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 3px);
+  opacity: 0.45;
 }
 .crt-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.38) 100%),
-    linear-gradient(115deg, rgba(255, 255, 255, 0.045) 0%, transparent 38%);
+    radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.42) 100%),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0%, transparent 35%);
 }
 
 .hidden { display: none !important; }
 
-/* on-screen channel blip, like a real TV */
 #osd {
   position: absolute;
-  top: 14px;
-  right: 18px;
-  padding: 4px 14px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.55);
+  top: 16px;
+  right: 20px;
+  padding: 4px 16px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
   color: #e8e4d8;
-  font-size: clamp(20px, 3.4vw, 34px);
+  font-size: clamp(22px, 3.6vw, 36px);
   font-weight: bold;
   letter-spacing: 3px;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.25);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 #power-off {
@@ -106,12 +118,11 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: radial-gradient(ellipse at center, #101320 0%, #050608 75%);
+  background: radial-gradient(ellipse at center, #14151c 0%, #060709 78%);
 }
 #power-off.off { display: none; }
-.power-logo { font-size: clamp(24px, 5vw, 46px); letter-spacing: 6px; color: #3d4356; }
-.power-logo span { color: #565d75; font-size: 0.55em; margin-left: 8px; letter-spacing: 3px; }
-.power-hint { font-size: 13px; color: #2e3342; letter-spacing: 2px; }
+.power-logo { font-size: clamp(26px, 5.4vw, 50px); letter-spacing: 8px; color: #454b5e; font-weight: bold; }
+.power-hint { font-size: 13px; color: #31364a; letter-spacing: 3px; }
 
 #break-overlay {
   position: absolute;
@@ -121,26 +132,15 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background: linear-gradient(160deg, #1d2b3a 0%, #14161f 100%);
+  background: linear-gradient(160deg, #232f3d 0%, #171a22 100%);
   text-align: center;
   padding: 20px;
 }
-.break-kicker { font-size: 15px; letter-spacing: 6px; color: #7f8ba3; }
-.break-label {
-  font-size: clamp(28px, 5.6vw, 54px);
-  font-weight: bold;
-  color: #e8e4d8;
-  letter-spacing: 2px;
-}
-.break-count { font-size: clamp(18px, 3vw, 26px); color: #9aa4bd; font-variant-numeric: tabular-nums; }
-.break-bar {
-  width: min(60%, 420px);
-  height: 10px;
-  border-radius: 6px;
-  background: #2c3345;
-  overflow: hidden;
-}
-#break-fill { height: 100%; width: 100%; background: #7f8ba3; border-radius: 6px; }
+.break-kicker { font-size: 15px; letter-spacing: 6px; color: #8a93a8; }
+.break-label { font-size: clamp(28px, 5.6vw, 54px); font-weight: bold; color: #e8e4d8; letter-spacing: 2px; }
+.break-count { font-size: clamp(18px, 3vw, 26px); color: #a5aec4; font-variant-numeric: tabular-nums; }
+.break-bar { width: min(60%, 420px); height: 10px; border-radius: 3px; background: #333a4c; overflow: hidden; border: 1px solid #454c5e; }
+#break-fill { height: 100%; width: 100%; background: #8a93a8; }
 
 #offair {
   position: absolute;
@@ -151,136 +151,146 @@ html, body {
   justify-content: center;
   gap: 12px;
 }
-.offair-text {
-  font-size: clamp(28px, 5.6vw, 52px);
-  letter-spacing: 14px;
-  color: rgba(232, 228, 216, 0.85);
-  text-shadow: 0 0 18px rgba(255, 255, 255, 0.15);
-}
-.offair-next { font-size: 16px; color: rgba(232, 228, 216, 0.55); letter-spacing: 1px; }
+.offair-text { font-size: clamp(28px, 5.6vw, 52px); letter-spacing: 14px; color: rgba(232, 228, 216, 0.8); text-shadow: 0 0 18px rgba(255, 255, 255, 0.18); }
+.offair-next { font-size: 16px; color: rgba(232, 228, 216, 0.5); letter-spacing: 1px; }
 
-/* ---- side panel: speaker, knobs, power ---- */
+/* ---- side panel ---- */
 .side-panel {
-  width: 132px;
+  width: 148px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 6px 0;
+  gap: 16px;
+  padding: 4px 0;
 }
 
-.brand {
+.brand-plate {
+  padding: 5px 14px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #3a3d45, #22242a);
+  border: 1px solid #000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  color: #b9bec9;
   font-size: 13px;
+  font-weight: bold;
   letter-spacing: 3px;
-  color: #8b90a0;
   text-align: center;
 }
-.brand span { display: block; font-size: 9px; letter-spacing: 4px; color: #5a5f70; margin-top: 2px; }
+.brand-plate span { display: block; font-size: 9px; letter-spacing: 5px; color: #7d828f; margin-top: 1px; }
 
 .ch-window {
-  min-width: 74px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: #0a0f0a;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
-  border: 1px solid #23262e;
+  min-width: 82px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  background: #070a07;
+  border: 1px solid #000;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.95), 0 1px 0 rgba(255, 255, 255, 0.07);
   text-align: center;
 }
 #ch-indicator {
   font-family: "Courier New", monospace;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 22px;
   color: #8fd694;
-  text-shadow: 0 0 8px rgba(143, 214, 148, 0.45);
+  text-shadow: 0 0 9px rgba(143, 214, 148, 0.5);
 }
 
+/* silver slit speaker grille, vertical */
 .speaker {
   flex: 1;
   width: 100%;
-  min-height: 60px;
-  border-radius: 10px;
+  min-height: 70px;
+  border-radius: 8px;
+  border: 1px solid #000;
   background:
-    repeating-linear-gradient(0deg, #0a0b0e 0 4px, #2a2c33 4px 6px),
-    #0a0b0e;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
-  border: 1px solid #23262e;
+    repeating-linear-gradient(0deg, #08090b 0 5px, #9aa0ab 5px 7px),
+    #08090b;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
-.controls-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.knob-row { display: flex; gap: 14px; }
-.knob-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.knob-label { font-size: 10px; letter-spacing: 2px; color: #6a6f80; }
+.controls-col { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.knob-row { display: flex; gap: 16px; }
+.knob-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.knob-label { font-size: 10px; letter-spacing: 3px; color: #7d828f; font-weight: bold; }
+
+/* tick ring around each dial */
+.knob-dial {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from -110deg, #6b707d 0deg 2.5deg, transparent 2.5deg 22deg);
+  -webkit-mask: radial-gradient(circle, transparent 60%, #000 62%);
+  mask: radial-gradient(circle, transparent 60%, #000 62%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .knob {
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  border: 3px solid #565b66;
-  background: radial-gradient(circle at 35% 30%, #3a3d46, #14151a 70%);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.12);
+  border: 3px solid #787d89;
+  background: radial-gradient(circle at 35% 30%, #33353d, #101116 72%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.15);
   cursor: pointer;
   position: relative;
   padding: 0;
+  transition: transform 0.22s ease;
 }
-.knob:active { transform: scale(0.96); }
+.knob:active { filter: brightness(1.25); }
 .knob-line {
   position: absolute;
   left: 50%;
-  top: 6px;
-  width: 3px;
-  height: 16px;
-  margin-left: -1.5px;
+  top: 5px;
+  width: 4px;
+  height: 18px;
+  margin-left: -2px;
   border-radius: 2px;
-  background: #c8ccd6;
+  background: #d3d7df;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.4);
 }
-#knob-uhf .knob-line { top: auto; bottom: 6px; }
 
-.power-switch {
-  width: 34px;
-  height: 56px;
-  border-radius: 8px;
-  border: 2px solid #565b66;
-  background: #101116;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+.power-row { display: flex; align-items: center; gap: 8px; }
+.power-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid #787d89;
+  background: radial-gradient(circle at 35% 30%, #33353d, #101116 72%);
+  color: #d3d7df;
+  font-size: 20px;
   cursor: pointer;
-  position: relative;
-  padding: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.15);
 }
-.switch-tab {
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: 5px;
-  height: 22px;
-  border-radius: 5px;
-  background: linear-gradient(180deg, #4a4e59, #2a2d36);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-  transition: bottom 0.12s ease;
+.power-btn.on { color: #8fd694; text-shadow: 0 0 8px rgba(143, 214, 148, 0.8); }
+.led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #4a1d1d;
+  border: 1px solid #000;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
 }
-.power-switch.on .switch-tab { bottom: 27px; background: linear-gradient(180deg, #7fae86, #4c7355); }
+.led.on { background: #ff5a4e; box-shadow: 0 0 8px rgba(255, 90, 78, 0.9); }
 
-#now-line {
-  font-size: 15px;
-  letter-spacing: 1px;
-  color: #6a6f80;
-  min-height: 20px;
-  text-align: center;
-  padding: 0 12px;
-}
+#now-line { font-size: 15px; letter-spacing: 1px; color: #7d828f; min-height: 20px; text-align: center; padding: 0 12px; }
 
 #clock {
   position: fixed;
   top: 14px;
   right: 20px;
   font-size: 18px;
-  color: #3d4356;
+  color: #454a59;
   letter-spacing: 2px;
   font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 680px) {
-  .tv-cabinet { flex-direction: column; }
-  .side-panel { width: 100%; flex-direction: row; justify-content: space-around; }
+  .tv-cabinet { flex-direction: column; padding: 16px; }
+  .screen-bezel { padding: 14px; }
+  .side-panel { width: 100%; flex-direction: row; justify-content: space-around; flex-wrap: wrap; }
   .speaker { display: none; }
-  .brand { display: none; }
+  .brand-plate { display: none; }
 }
