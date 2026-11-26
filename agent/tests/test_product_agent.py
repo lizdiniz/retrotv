@@ -217,7 +217,7 @@ def test_llm_request_builder_importable():
 
     req = _request("system", "user")
     assert req.model == LLM_MODEL
-    assert req.messages[0]["role"] == "system"
+    assert req.messages[0].role == "system"
 
 
 async def test_webhook_envelope_defaults_to_event_mode_and_repo(temporal_env):
