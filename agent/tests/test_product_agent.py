@@ -7,6 +7,8 @@ exercised end-to-end without network access.
 
 import asyncio
 import json
+
+import pytest
 from datetime import timedelta
 
 import mistralai.workflows as workflows
@@ -210,6 +212,14 @@ async def test_github_event_without_issue_is_noop(temporal_env):
     )
     assert result["handled"] is False
     assert CALLS == []
+
+
+async def test_gh_requires_token(monkeypatch):
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    from worker.workflows.product_agent import _gh
+
+    with pytest.raises(RuntimeError, match="GITHUB_TOKEN"):
+        await _gh("GET", "/search/issues", params={"q": "x"})
 
 
 def test_llm_request_builder_importable():

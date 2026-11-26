@@ -8,28 +8,25 @@ One workflow, five modes, all external effects inside activities:
 - ``digest``        weekly digest issue: opened/closed issues, merged PRs
 - ``github_event``  react to a single GitHub webhook event (new issue/PR)
 
-GitHub access goes through the workspace ``github_app`` connector; LLM calls go
-through the Mistral plugin activities. Set ``dry_run=true`` to compute everything
-and write nothing.
+GitHub is called directly over REST with a fine-grained PAT from the
+``GITHUB_TOKEN`` workspace secret (the github_app connector is OAuth-only and
+therefore user-scope, so it cannot serve unattended runs). LLM calls go through
+the Mistral plugin activities. Set ``dry_run=true`` to compute everything and
+write nothing.
 """
 
+import os
 from datetime import timedelta
 from typing import Any, Literal, Optional
 
 import pydantic
 import mistralai.workflows as workflows
-from mistralai.workflows import Depends, workflow
+from mistralai.workflows import workflow
 from mistralai.workflows.plugins.mistralai import chat_parse_to_model
-from mistralai.workflows.plugins.mistralai.connectors import (
-    ToolCallClient,
-    connector,
-    uses_connectors,
-)
-
-github = connector("github_app")
 
 DEFAULT_REPO = "lizdiniz/retrotv"
 LLM_MODEL = "mistral-small-latest"
+GITHUB_API = "https://api.github.com"
 
 
 class ProductAgentInput(pydantic.BaseModel):
@@ -99,47 +96,46 @@ def _issue_brief(issue: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# GitHub activities (all network I/O lives here)
+# GitHub REST activities (all network I/O lives here)
 # ---------------------------------------------------------------------------
 
 
+async def _gh(method: str, path: str, **kwargs: Any) -> Any:
+    import httpx
+
+    token = os.environ.get("GITHUB_TOKEN", "")
+    if not token:
+        raise RuntimeError("GITHUB_TOKEN workspace secret is not set")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    async with httpx.AsyncClient(base_url=GITHUB_API, headers=headers, timeout=60) as client:
+        resp = await client.request(method, path, **kwargs)
+        if resp.status_code >= 400:
+            raise RuntimeError(f"GitHub {method} {path} -> {resp.status_code}: {resp.text[:500]}")
+        if resp.status_code == 204:
+            return None
+        return resp.json()
+
+
 @workflows.activity(name="gh-search-issues", start_to_close_timeout=timedelta(seconds=60))
-async def gh_search_issues(
-    repo: str, query: str, per_page: int, client: ToolCallClient = Depends(github)
-) -> list[dict[str, Any]]:
-    owner, name = _split_repo(repo)
-    result = await client.call_tool(
-        tool_name="search_issues",
-        arguments={"query": query, "owner": owner, "repo": name, "per_page": per_page},
-    )
-    if isinstance(result, dict):
-        return list(result.get("items") or [])
-    return list(result or [])
+async def gh_search_issues(repo: str, query: str, per_page: int) -> list[dict[str, Any]]:
+    data = await _gh("GET", "/search/issues", params={"q": query, "per_page": per_page})
+    return list((data or {}).get("items") or [])
 
 
 @workflows.activity(name="gh-search-prs", start_to_close_timeout=timedelta(seconds=60))
-async def gh_search_prs(
-    repo: str, query: str, per_page: int, client: ToolCallClient = Depends(github)
-) -> list[dict[str, Any]]:
-    owner, name = _split_repo(repo)
-    result = await client.call_tool(
-        tool_name="search_pull_requests",
-        arguments={"query": query, "owner": owner, "repo": name, "per_page": per_page},
-    )
-    if isinstance(result, dict):
-        return list(result.get("items") or [])
-    return list(result or [])
+async def gh_search_prs(repo: str, query: str, per_page: int) -> list[dict[str, Any]]:
+    data = await _gh("GET", "/search/issues", params={"q": query, "per_page": per_page})
+    return list((data or {}).get("items") or [])
 
 
 @workflows.activity(name="gh-list-commits", start_to_close_timeout=timedelta(seconds=60))
-async def gh_list_commits(
-    repo: str, per_page: int, client: ToolCallClient = Depends(github)
-) -> list[dict[str, Any]]:
+async def gh_list_commits(repo: str, per_page: int) -> list[dict[str, Any]]:
     owner, name = _split_repo(repo)
-    result = await client.call_tool(
-        tool_name="list_commits",
-        arguments={"owner": owner, "repo": name, "per_page": per_page},
-    )
+    result = await _gh("GET", f"/repos/{owner}/{name}/commits", params={"per_page": per_page})
     return [
         {
             "sha": (c.get("sha") or "")[:10],
@@ -151,18 +147,13 @@ async def gh_list_commits(
 
 
 @workflows.activity(name="gh-get-file", start_to_close_timeout=timedelta(seconds=60))
-async def gh_get_file(
-    repo: str, path: str, ref: str, client: ToolCallClient = Depends(github)
-) -> Optional[dict[str, Any]]:
+async def gh_get_file(repo: str, path: str, ref: str) -> Optional[dict[str, Any]]:
     import base64
 
     owner, name = _split_repo(repo)
     try:
-        result = await client.call_tool(
-            tool_name="get_file_contents",
-            arguments={"owner": owner, "repo": name, "path": path, "ref": ref},
-        )
-    except Exception:
+        result = await _gh("GET", f"/repos/{owner}/{name}/contents/{path}", params={"ref": ref})
+    except RuntimeError:
         return None
     if not isinstance(result, dict):
         return None
@@ -184,90 +175,59 @@ async def gh_put_file(
     message: str,
     branch: str,
     sha: Optional[str],
-    client: ToolCallClient = Depends(github),
 ) -> dict[str, Any]:
+    import base64
+
     owner, name = _split_repo(repo)
-    args: dict[str, Any] = {
-        "owner": owner,
-        "repo": name,
-        "path": path,
-        "content": content,
+    payload: dict[str, Any] = {
+        "content": base64.b64encode(content.encode("utf-8")).decode("ascii"),
         "message": message,
         "branch": branch,
     }
     if sha:
-        args["sha"] = sha
-    result = await client.call_tool(tool_name="create_or_update_file", arguments=args)
+        payload["sha"] = sha
+    result = await _gh("PUT", f"/repos/{owner}/{name}/contents/{path}", json=payload)
     return result if isinstance(result, dict) else {"result": result}
 
 
 @workflows.activity(name="gh-add-comment", start_to_close_timeout=timedelta(seconds=60))
-async def gh_add_comment(
-    repo: str, issue_number: int, body: str, client: ToolCallClient = Depends(github)
-) -> None:
+async def gh_add_comment(repo: str, issue_number: int, body: str) -> None:
     owner, name = _split_repo(repo)
-    await client.call_tool(
-        tool_name="add_issue_comment",
-        arguments={"owner": owner, "repo": name, "issue_number": issue_number, "body": body},
-    )
+    await _gh("POST", f"/repos/{owner}/{name}/issues/{issue_number}/comments", json={"body": body})
 
 
 @workflows.activity(name="gh-set-labels", start_to_close_timeout=timedelta(seconds=60))
-async def gh_set_labels(
-    repo: str, issue_number: int, labels: list[str], client: ToolCallClient = Depends(github)
-) -> None:
+async def gh_set_labels(repo: str, issue_number: int, labels: list[str]) -> None:
     owner, name = _split_repo(repo)
-    await client.call_tool(
-        tool_name="update_issue",
-        arguments={"owner": owner, "repo": name, "issue_number": issue_number, "labels": labels},
-    )
+    await _gh("PATCH", f"/repos/{owner}/{name}/issues/{issue_number}", json={"labels": labels})
 
 
 @workflows.activity(name="gh-create-issue", start_to_close_timeout=timedelta(seconds=60))
-async def gh_create_issue(
-    repo: str, title: str, body: str, labels: list[str], client: ToolCallClient = Depends(github)
-) -> dict[str, Any]:
+async def gh_create_issue(repo: str, title: str, body: str, labels: list[str]) -> dict[str, Any]:
     owner, name = _split_repo(repo)
-    result = await client.call_tool(
-        tool_name="create_issue",
-        arguments={"owner": owner, "repo": name, "title": title, "body": body, "labels": labels},
+    result = await _gh(
+        "POST", f"/repos/{owner}/{name}/issues",
+        json={"title": title, "body": body, "labels": labels},
     )
     return result if isinstance(result, dict) else {"result": result}
 
 
 @workflows.activity(name="gh-create-branch", start_to_close_timeout=timedelta(seconds=60))
-async def gh_create_branch(
-    repo: str, branch: str, from_branch: str, client: ToolCallClient = Depends(github)
-) -> None:
+async def gh_create_branch(repo: str, branch: str, from_branch: str) -> None:
     owner, name = _split_repo(repo)
-    await client.call_tool(
-        tool_name="create_branch",
-        arguments={"owner": owner, "repo": name, "branch": branch, "from_branch": from_branch},
-    )
+    ref = await _gh("GET", f"/repos/{owner}/{name}/git/ref/heads/{from_branch}")
+    sha = ref["object"]["sha"]
+    await _gh("POST", f"/repos/{owner}/{name}/git/refs", json={"ref": f"refs/heads/{branch}", "sha": sha})
 
 
 @workflows.activity(name="gh-create-pr", start_to_close_timeout=timedelta(seconds=60))
 async def gh_create_pr(
-    repo: str,
-    title: str,
-    head: str,
-    base: str,
-    body: str,
-    draft: bool,
-    client: ToolCallClient = Depends(github),
+    repo: str, title: str, head: str, base: str, body: str, draft: bool
 ) -> dict[str, Any]:
     owner, name = _split_repo(repo)
-    result = await client.call_tool(
-        tool_name="create_pull_request",
-        arguments={
-            "owner": owner,
-            "repo": name,
-            "title": title,
-            "head": head,
-            "base": base,
-            "body": body,
-            "draft": draft,
-        },
+    result = await _gh(
+        "POST", f"/repos/{owner}/{name}/pulls",
+        json={"title": title, "head": head, "base": base, "body": body, "draft": draft},
     )
     return result if isinstance(result, dict) else {"result": result}
 
@@ -358,8 +318,7 @@ TRIAGE_SYSTEM_NOTE = (
 )
 
 
-@workflows.workflow.define(name="retrotv-product-agent", on_behalf_of=True)
-@uses_connectors(github)
+@workflows.workflow.define(name="retrotv-product-agent")
 class ProductAgentWorkflow:
     @workflows.workflow.entrypoint
     async def run(self, data: ProductAgentInput) -> dict[str, Any]:

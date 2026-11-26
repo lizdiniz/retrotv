@@ -6,6 +6,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir \
     "mistralai-workflows[mistralai]>=3.17.1" \
     "pydantic>=2.14.1" \
+    "httpx>=0.27" \
     "pytest>=8" \
     "pytest-asyncio>=0.25.3"
 COPY pyproject.toml ./

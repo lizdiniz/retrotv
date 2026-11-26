@@ -17,9 +17,12 @@ All modes accept `dry_run: true` (compute, write nothing). A raw GitHub webhook
 payload as input is auto-detected: mode becomes `github_event` and `repo` comes
 from `repository.full_name`.
 
-GitHub via the `github_app` connector; LLM via the plugin's `chat_parse_to_model`.
-`on_behalf_of=True`: user-started runs act as that user. Scheduled/webhook runs
-additionally need a **workspace-scope credential** on `github_app` in Studio.
+GitHub is called over REST with a fine-grained PAT from the `GITHUB_TOKEN`
+**workspace secret** (the `github_app` connector is OAuth-only = user-scope, so
+it cannot serve unattended runs). LLM calls use the plugin's `chat_parse_to_model`.
+Create the secret in Studio (Secrets) and bind it to the deployment as env var
+`GITHUB_TOKEN`; PAT needs `Contents: write`, `Issues: write`, `Pull requests: write`
+on `lizdiniz/retrotv`.
 
 ## Layout / run
 
@@ -39,7 +42,7 @@ PYTHONPATH=src .venv/bin/python -m pytest -q    # 8 passed
 ## Deploy
 
 Managed deployment from this repo: build dir `agent/`, dockerfile `Dockerfile`,
-deployment name `retrotv-agent`, `hardened=true` (OBO). Then: one manual
+deployment name `retrotv-agent`, with `GITHUB_TOKEN` bound from a workspace secret. Then: one manual
 `{"mode":"triage","dry_run":true}` run to validate, weekly schedules
 (triage/roadmap/digest), and a GitHub webhook trigger (`issues` +
 `pull_request` events) wired through a Studio webhook.
